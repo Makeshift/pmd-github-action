@@ -1,4 +1,10 @@
 import * as core from '@actions/core'
+import parser from 'fast-xml-parser'
+import fs from 'fs'
+import * as path from 'path'
+import { chain, map } from 'ramda'
+import decode from 'unescape'
+import { Annotation, AnnotationLevel } from './github'
 import {
   Duplication,
   File,
@@ -6,13 +12,6 @@ import {
   isPMDReportType,
   PMDReportType
 } from './pmd'
-import parser from 'fast-xml-parser'
-import fs from 'fs'
-import BufferEncoding from 'buffer'
-import * as path from 'path'
-import {Annotation, AnnotationLevel} from './github'
-import {chain, map} from 'ramda'
-import decode from 'unescape'
 
 const XML_PARSE_OPTIONS = {
   allowBooleanAttributes: true,
@@ -63,13 +62,24 @@ export function annotationsForPath(resultFile: string): Annotation[] {
   } else if (isPMDCPDReportType(result)) {
     return chain(duplication => {
       return map(file => {
+        const dupeList = duplication.file
+          .map(f => {
+            return `- \`${f.path}\`:${f.line}`
+          })
+          .join('\n')
+
         const annotation: Annotation = {
           annotation_level: AnnotationLevel.failure,
           path: path.relative(root, file.path),
           start_line: Number(file.line),
           end_line: Number(file.line) + Number(duplication.lines),
           title: 'Duplicate code found',
-          message: file.codefragment
+          message: `This code block was found duplicated in:
+${dupeList}
+\`\`\`ts
+${file.codefragment}
+\`\`\
+`
         }
 
         return annotation

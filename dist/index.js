@@ -31,13 +31,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.annotationsForPath = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const pmd_1 = __nccwpck_require__(690);
 const fast_xml_parser_1 = __importDefault(__nccwpck_require__(7448));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const path = __importStar(__nccwpck_require__(5622));
-const github_1 = __nccwpck_require__(5928);
 const ramda_1 = __nccwpck_require__(4119);
 const unescape_1 = __importDefault(__nccwpck_require__(1441));
+const github_1 = __nccwpck_require__(8828);
+const pmd_1 = __nccwpck_require__(690);
 const XML_PARSE_OPTIONS = {
     allowBooleanAttributes: true,
     ignoreAttributes: false,
@@ -80,13 +80,23 @@ function annotationsForPath(resultFile) {
     else if ((0, pmd_1.isPMDCPDReportType)(result)) {
         return (0, ramda_1.chain)(duplication => {
             return (0, ramda_1.map)(file => {
+                const dupeList = duplication.file
+                    .map(f => {
+                    return `- \`${f.path}\`:${f.line}`;
+                })
+                    .join('\n');
                 const annotation = {
                     annotation_level: github_1.AnnotationLevel.failure,
                     path: path.relative(root, file.path),
                     start_line: Number(file.line),
                     end_line: Number(file.line) + Number(duplication.lines),
                     title: 'Duplicate code found',
-                    message: file.codefragment
+                    message: `This code block was found duplicated in:
+${dupeList}
+\`\`\`ts
+${file.codefragment}
+\`\`\
+`
                 };
                 return annotation;
             }, asArray(duplication.file));
@@ -117,7 +127,7 @@ var Inputs;
 
 /***/ }),
 
-/***/ 5928:
+/***/ 8828:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -11150,7 +11160,7 @@ module.exports = T;
 
 /***/ }),
 
-/***/ 2793:
+/***/ 5928:
 /***/ ((module) => {
 
 /**
@@ -15783,7 +15793,7 @@ module.exports = includes;
 module.exports = {};
 module.exports.F = __nccwpck_require__(4097);
 module.exports.T = __nccwpck_require__(8554);
-module.exports.__ = __nccwpck_require__(2793);
+module.exports.__ = __nccwpck_require__(5928);
 module.exports.add = __nccwpck_require__(8100);
 module.exports.addIndex = __nccwpck_require__(8215);
 module.exports.adjust = __nccwpck_require__(743);

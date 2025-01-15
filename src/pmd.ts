@@ -15,7 +15,7 @@ export interface PMDCPDReport {
 export interface Duplication {
   codefragment: string
   lines: string
-  file: DuplicationFile
+  file: DuplicationFile[]
 }
 
 export interface DuplicationFile {
