@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?><pmd-cpd>
+      <duplication lines="23">
+            <file path="src/components/home/MessageWithTags.tsx" line="15">
+              <codefragment><![CDATA[;
+import { ActionHistoryType, TagMap } from 'types';
+
+const styleValidHashtag = (match: string, i: number) => {
+  if ((match.match(/[\s]?#/g) || []).length === 1) {
+    return (
+      <span key={match + i} className="share_tag_message">
+        {match}
+      </span>
+    );
+  }
+  return match;
+};
+
+interface MessageWithTagsProps {
+  actionTypeId: ActionHistoryType;
+  message: string | null;
+  tags: TagMap;
+  accountAPIId: number;
+  outerClass: string;
+  truncateLines?: number;
+}
+
+const MessageWithTags]]></codefragment>
+            </file>
+            <file path="src/components/home/analytics/AnalyticsMessageWithTags.tsx" line="15">
+              <codefragment><![CDATA[;
+import { ActionHistoryType, TagMap } from 'types';
+
+const styleValidHashtag = (match: string, i: number) => {
+  if ((match.match(/[\s]?#/g) || []).length === 1) {
+    return (
+      <span key={match + i} className="share_tag_message">
+        {match}
+      </span>
+    );
+  }
+  return match;
+};
+
+interface MessageWithTagsProps {
+  actionTypeId: ActionHistoryType;
+  message: string | null;
+  tags: TagMap;
+  accountAPIId: number;
+  outerClass: string;
+  truncateLines?: number;
+}
+
+const AnalyticsMessageWithTags]]></codefragment>
+            </file>
+            <codefragment><![CDATA[;
+import { ActionHistoryType, TagMap } from 'types';
+
+const styleValidHashtag = (match: string, i: number) => {
+  if ((match.match(/[\s]?#/g) || []).length === 1) {
+    return (
+      <span key={match + i} className="share_tag_message">
+        {match}
+      </span>
+    );
+  }
+  return match;
+};
+
+interface MessageWithTagsProps {
+  actionTypeId: ActionHistoryType;
+  message: string | null;
+  tags: TagMap;
+  accountAPIId: number;
+  outerClass: string;
+  truncateLines?: number;
+}
+
+const MessageWithTags]]></codefragment>
+        </duplication>
+      
+      <duplication lines="32">
+            <file path="src/components/home/MessageWithTags.tsx" line="57">
+              <codefragment><![CDATA[);
+      output = reactStringReplace(output, find, (match, i) => (
+        <span key={match + i} className="share_tag_message">
+          {tag.clean}
+        </span>
+      ));
+    });
+  });
+
+  // When a post is directly shared to LinkedIn, the message can contain \ used to escape characters (e.g. \#)
+  // We want to remove those when we display the message text
+  const apiTypeId = getAPITypeId({ accountAPIId });
+  const wasSharedDirectlyToLinkedIn =
+    apiTypeId === API_TYPE_IDS.LINKEDIN &&
+    actionTypeId !== ACTION_HISTORY_TYPES.ECHOBOX_SHARE;
+  if (wasSharedDirectlyToLinkedIn) {
+    output = reactStringReplace(output, /\\([^a-zA-Z0-9])/g, (match) => match);
+  }
+
+  output = reactStringReplace(output, /^(#[\w]+)/g, styleValidHashtag);
+
+  output = reactStringReplace(
+    output,
+    /([\s][@|#](?!Echobox=)\S+)/g,
+    styleValidHashtag,
+  );
+
+  const textDirectionClass = getTextDirection({
+    accountAPIId,
+    text: message,
+  });
+
+  const]]></codefragment>
+            </file>
+            <file path="src/components/home/analytics/AnalyticsMessageWithTags.tsx" line="64">
+              <codefragment><![CDATA[);
+      output = reactStringReplace(output, find, (match, i) => (
+        <span key={match + i} className="share_tag_message">
+          {tag.clean}
+        </span>
+      ));
+    });
+  });
+
+  // When a post is directly shared to LinkedIn, the message can contain \ used to escape characters (e.g. \#)
+  // We want to remove those when we display the message text
+  const apiTypeId = getAPITypeId({ accountAPIId });
+  const wasSharedDirectlyToLinkedIn =
+    apiTypeId === API_TYPE_IDS.LINKEDIN &&
+    actionTypeId !== ACTION_HISTORY_TYPES.ECHOBOX_SHARE;
+  if (wasSharedDirectlyToLinkedIn) {
+    output = reactStringReplace(output, /\\([^a-zA-Z0-9])/g, (match) => match);
+  }
+
+  output = reactStringReplace(output, /^(#[\w]+)/g, styleValidHashtag);
+
+  output = reactStringReplace(
+    output,
+    /([\s][@|#](?!Echobox=)\S+)/g,
+    styleValidHashtag,
+  );
+
+  const textDirectionClass = getTextDirection({
+    accountAPIId,
+    text: message,
+  });
+
+  return]]></codefragment>
+            </file>
+            <codefragment><![CDATA[);
+      output = reactStringReplace(output, find, (match, i) => (
+        <span key={match + i} className="share_tag_message">
+          {tag.clean}
+        </span>
+      ));
+    });
+  });
+
+  // When a post is directly shared to LinkedIn, the message can contain \ used to escape characters (e.g. \#)
+  // We want to remove those when we display the message text
+  const apiTypeId = getAPITypeId({ accountAPIId });
+  const wasSharedDirectlyToLinkedIn =
+    apiTypeId === API_TYPE_IDS.LINKEDIN &&
+    actionTypeId !== ACTION_HISTORY_TYPES.ECHOBOX_SHARE;
+  if (wasSharedDirectlyToLinkedIn) {
+    output = reactStringReplace(output, /\\([^a-zA-Z0-9])/g, (match) => match);
+  }
+
+  output = reactStringReplace(output, /^(#[\w]+)/g, styleValidHashtag);
+
+  output = reactStringReplace(
+    output,
+    /([\s][@|#](?!Echobox=)\S+)/g,
+    styleValidHashtag,
+  );
+
+  const textDirectionClass = getTextDirection({
+    accountAPIId,
+    text: message,
+  });
+
+  const]]></codefragment>
+        </duplication>
+      </pmd-cpd>

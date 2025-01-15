@@ -31,6 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.annotationsForPath = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const pmd_1 = __nccwpck_require__(690);
 const fast_xml_parser_1 = __importDefault(__nccwpck_require__(7448));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const path = __importStar(__nccwpck_require__(5622));
@@ -57,23 +58,41 @@ function getWarningLevel(arg) {
     }
 }
 function annotationsForPath(resultFile) {
-    var _a;
+    var _a, _b;
     core.info(`Creating annotations for ${resultFile}`);
     const root = process.env['GITHUB_WORKSPACE'] || '';
     const result = fast_xml_parser_1.default.parse(fs_1.default.readFileSync(resultFile, 'UTF-8'), XML_PARSE_OPTIONS);
-    return (0, ramda_1.chain)(file => {
-        return (0, ramda_1.map)(violation => {
-            const annotation = {
-                annotation_level: getWarningLevel(violation.priority),
-                path: path.relative(root, file.name),
-                start_line: Number(violation.beginline || 1),
-                end_line: Number(violation.endline || violation.beginline || 1),
-                title: `${violation.ruleset} ${violation.rule}`,
-                message: (0, unescape_1.default)(violation['#text'])
-            };
-            return annotation;
-        }, asArray(file.violation));
-    }, asArray((_a = result.pmd) === null || _a === void 0 ? void 0 : _a.file));
+    if ((0, pmd_1.isPMDReportType)(result)) {
+        return (0, ramda_1.chain)(file => {
+            return (0, ramda_1.map)(violation => {
+                const annotation = {
+                    annotation_level: getWarningLevel(violation.priority),
+                    path: path.relative(root, file.name),
+                    start_line: Number(violation.beginline || 1),
+                    end_line: Number(violation.endline || violation.beginline || 1),
+                    title: `${violation.ruleset} ${violation.rule}`,
+                    message: (0, unescape_1.default)(violation['#text'])
+                };
+                return annotation;
+            }, asArray(file.violation));
+        }, asArray((_a = result.pmd) === null || _a === void 0 ? void 0 : _a.file));
+    }
+    else if ((0, pmd_1.isPMDCPDReportType)(result)) {
+        return (0, ramda_1.chain)(duplication => {
+            return (0, ramda_1.map)(file => {
+                const annotation = {
+                    annotation_level: github_1.AnnotationLevel.failure,
+                    path: path.relative(root, file.path),
+                    start_line: Number(file.line),
+                    end_line: Number(file.line) + Number(duplication.lines),
+                    title: 'Duplicate code found',
+                    message: file.codefragment
+                };
+                return annotation;
+            }, asArray(duplication.file));
+        }, asArray((_b = result['pmd-cpd']) === null || _b === void 0 ? void 0 : _b.duplication));
+    }
+    return [];
 }
 exports.annotationsForPath = annotationsForPath;
 
@@ -215,6 +234,25 @@ function createCheck(name, title, annotations, numErrors) {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 690:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isPMDCPDReportType = exports.isPMDReportType = void 0;
+function isPMDReportType(arg) {
+    return 'pmd' in arg;
+}
+exports.isPMDReportType = isPMDReportType;
+function isPMDCPDReportType(arg) {
+    return 'pmd-cpd' in arg;
+}
+exports.isPMDCPDReportType = isPMDCPDReportType;
 
 
 /***/ }),

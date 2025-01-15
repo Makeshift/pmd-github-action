@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug via Launch",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "tsx",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "src/main.ts"
+      ],
+      "envFile": "${workspaceFolder}/.env"
+    },
+    // this didn't work for me
+    {
+      "name": "Debug Action",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "cwd": "${workspaceRoot}",
+      "args": [
+        "local-action",
+        ".",
+        "src/main.ts",
+        ".env"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**",
+        "node_modules/**"
+      ]
+    }
+  ]
+}

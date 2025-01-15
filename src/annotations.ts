@@ -1,5 +1,11 @@
 import * as core from '@actions/core'
-import {File, PMDReport} from './pmd'
+import {
+  Duplication,
+  File,
+  isPMDCPDReportType,
+  isPMDReportType,
+  PMDReportType
+} from './pmd'
 import parser from 'fast-xml-parser'
 import fs from 'fs'
 import BufferEncoding from 'buffer'
@@ -34,23 +40,42 @@ export function annotationsForPath(resultFile: string): Annotation[] {
   core.info(`Creating annotations for ${resultFile}`)
   const root: string = process.env['GITHUB_WORKSPACE'] || ''
 
-  const result: PMDReport = parser.parse(
+  const result: PMDReportType = parser.parse(
     fs.readFileSync(resultFile, 'UTF-8' as BufferEncoding),
     XML_PARSE_OPTIONS
   )
 
-  return chain(file => {
-    return map(violation => {
-      const annotation: Annotation = {
-        annotation_level: getWarningLevel(violation.priority),
-        path: path.relative(root, file.name),
-        start_line: Number(violation.beginline || 1),
-        end_line: Number(violation.endline || violation.beginline || 1),
-        title: `${violation.ruleset} ${violation.rule}`,
-        message: decode(violation['#text'])
-      }
+  if (isPMDReportType(result)) {
+    return chain(file => {
+      return map(violation => {
+        const annotation: Annotation = {
+          annotation_level: getWarningLevel(violation.priority),
+          path: path.relative(root, file.name),
+          start_line: Number(violation.beginline || 1),
+          end_line: Number(violation.endline || violation.beginline || 1),
+          title: `${violation.ruleset} ${violation.rule}`,
+          message: decode(violation['#text'])
+        }
 
-      return annotation
-    }, asArray(file.violation))
-  }, asArray<File>(result.pmd?.file))
+        return annotation
+      }, asArray(file.violation))
+    }, asArray<File>(result.pmd?.file))
+  } else if (isPMDCPDReportType(result)) {
+    return chain(duplication => {
+      return map(file => {
+        const annotation: Annotation = {
+          annotation_level: AnnotationLevel.failure,
+          path: path.relative(root, file.path),
+          start_line: Number(file.line),
+          end_line: Number(file.line) + Number(duplication.lines),
+          title: 'Duplicate code found',
+          message: file.codefragment
+        }
+
+        return annotation
+      }, asArray(duplication.file))
+    }, asArray<Duplication>(result['pmd-cpd']?.duplication))
+  }
+
+  return []
 }
