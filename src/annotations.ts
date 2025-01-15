@@ -64,21 +64,22 @@ export function annotationsForPath(resultFile: string): Annotation[] {
       return map(file => {
         const dupeList = duplication.file
           .map(f => {
-            return `- \`${f.path}\`:${f.line}`
+            return `- ${f.path}:${f.line}`
           })
           .join('\n')
 
         const annotation: Annotation = {
+          raw_details: JSON.stringify(duplication),
           annotation_level: AnnotationLevel.failure,
           path: path.relative(root, file.path),
           start_line: Number(file.line),
           end_line: Number(file.line) + Number(duplication.lines),
-          title: 'Duplicate code found',
+          title: `${duplication.lines} duplicated lines found`,
+          // Markdown isn't supported in annotations :(
           message: `This code block was found duplicated in:
 ${dupeList}
-\`\`\`ts
+
 ${file.codefragment}
-\`\`\
 `
         }
 

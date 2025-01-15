@@ -35,7 +35,7 @@ const fast_xml_parser_1 = __importDefault(__nccwpck_require__(7448));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const path = __importStar(__nccwpck_require__(5622));
 const ramda_1 = __nccwpck_require__(4119);
-const unescape_1 = __importDefault(__nccwpck_require__(1441));
+const unescape_1 = __importDefault(__nccwpck_require__(8090));
 const github_1 = __nccwpck_require__(8828);
 const pmd_1 = __nccwpck_require__(690);
 const XML_PARSE_OPTIONS = {
@@ -82,20 +82,21 @@ function annotationsForPath(resultFile) {
             return (0, ramda_1.map)(file => {
                 const dupeList = duplication.file
                     .map(f => {
-                    return `- \`${f.path}\`:${f.line}`;
+                    return `- ${f.path}:${f.line}`;
                 })
                     .join('\n');
                 const annotation = {
+                    raw_details: JSON.stringify(duplication),
                     annotation_level: github_1.AnnotationLevel.failure,
                     path: path.relative(root, file.path),
                     start_line: Number(file.line),
                     end_line: Number(file.line) + Number(duplication.lines),
-                    title: 'Duplicate code found',
+                    title: `${duplication.lines} duplicated lines found`,
+                    // Markdown isn't supported in annotations :(
                     message: `This code block was found duplicated in:
 ${dupeList}
-\`\`\`ts
+
 ${file.codefragment}
-\`\`\
 `
                 };
                 return annotation;
@@ -179,11 +180,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const search_1 = __nccwpck_require__(2506);
-const constants_1 = __nccwpck_require__(5105);
-const annotations_1 = __nccwpck_require__(5598);
-const ramda_1 = __nccwpck_require__(4119);
 const github_1 = __nccwpck_require__(5438);
+const ramda_1 = __nccwpck_require__(4119);
+const annotations_1 = __nccwpck_require__(5598);
+const constants_1 = __nccwpck_require__(5105);
+const search_1 = __nccwpck_require__(2506);
 const MAX_ANNOTATIONS_PER_REQUEST = 50;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -224,9 +225,15 @@ function createCheck(name, title, annotations, numErrors) {
         const req = Object.assign(Object.assign({}, github_1.context.repo), { ref: sha });
         const res = yield octokit.checks.listForRef(req);
         const existingCheckRun = res.data.check_runs.find(check => check.name === name);
+        const summary = annotations.map(annotation => {
+            return `- \`${annotation.path}\` - ${annotation.start_line}:${annotation.end_line}`;
+        });
         if (!existingCheckRun) {
             const createRequest = Object.assign(Object.assign({}, github_1.context.repo), { head_sha: sha, name, status: 'completed', conclusion: numErrors === 0 ? 'success' : 'failure', output: {
                     title,
+                    text: numErrors !== 0
+                        ? `Found duplicated code in the following files:\n${summary.join('\n')}`
+                        : '',
                     summary: `${numErrors} violation(s) found`,
                     annotations
                 } });
@@ -302,7 +309,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findResults = void 0;
-const glob = __importStar(__nccwpck_require__(8090));
+const glob = __importStar(__nccwpck_require__(6235));
 const core_1 = __nccwpck_require__(2186);
 const fs_1 = __nccwpck_require__(5747);
 const path_1 = __nccwpck_require__(5622);
@@ -963,7 +970,7 @@ exports.getOctokit = getOctokit;
 
 /***/ }),
 
-/***/ 8347:
+/***/ 7914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1040,7 +1047,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
 const Context = __importStar(__nccwpck_require__(4087));
-const Utils = __importStar(__nccwpck_require__(8347));
+const Utils = __importStar(__nccwpck_require__(7914));
 // octokit + plugins
 const core_1 = __nccwpck_require__(6762);
 const plugin_rest_endpoint_methods_1 = __nccwpck_require__(3044);
@@ -1074,7 +1081,7 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 8090:
+/***/ 6235:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2993,7 +3000,7 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 413:
+/***/ 9440:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -5645,8 +5652,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __nccwpck_require__(413);
-var universalUserAgent = __nccwpck_require__(1007);
+var endpoint = __nccwpck_require__(9440);
+var universalUserAgent = __nccwpck_require__(1441);
 var isPlainObject = __nccwpck_require__(3287);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
@@ -5820,7 +5827,7 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 1007:
+/***/ 1441:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -6093,7 +6100,7 @@ function removeHook(state, name, method) {
 /***/ 3717:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var concatMap = __nccwpck_require__(6891);
+var concatMap = __nccwpck_require__(2720);
 var balanced = __nccwpck_require__(9417);
 
 module.exports = expandTop;
@@ -6298,7 +6305,7 @@ function expand(str, isTop) {
 
 /***/ }),
 
-/***/ 6891:
+/***/ 2720:
 /***/ ((module) => {
 
 module.exports = function (xs, fn) {
@@ -11813,7 +11820,7 @@ module.exports = ap;
 
 var _aperture =
 /*#__PURE__*/
-__nccwpck_require__(7914);
+__nccwpck_require__(4005);
 
 var _curry2 =
 /*#__PURE__*/
@@ -15910,7 +15917,7 @@ module.exports.lt = __nccwpck_require__(2342);
 module.exports.lte = __nccwpck_require__(5973);
 module.exports.map = __nccwpck_require__(8820);
 module.exports.mapAccum = __nccwpck_require__(3699);
-module.exports.mapAccumRight = __nccwpck_require__(9440);
+module.exports.mapAccumRight = __nccwpck_require__(9061);
 module.exports.mapObjIndexed = __nccwpck_require__(1986);
 module.exports.match = __nccwpck_require__(8964);
 module.exports.mathMod = __nccwpck_require__(6733);
@@ -15972,7 +15979,7 @@ module.exports.prop = __nccwpck_require__(2135);
 module.exports.propEq = __nccwpck_require__(7301);
 module.exports.propIs = __nccwpck_require__(9867);
 module.exports.propOr = __nccwpck_require__(5694);
-module.exports.propSatisfies = __nccwpck_require__(1161);
+module.exports.propSatisfies = __nccwpck_require__(6891);
 module.exports.props = __nccwpck_require__(7807);
 module.exports.range = __nccwpck_require__(1808);
 module.exports.reduce = __nccwpck_require__(1941);
@@ -16523,7 +16530,7 @@ module.exports = _Set;
 
 /***/ }),
 
-/***/ 7914:
+/***/ 4005:
 /***/ ((module) => {
 
 function _aperture(n, list) {
@@ -20622,7 +20629,7 @@ module.exports = mapAccum;
 
 /***/ }),
 
-/***/ 9440:
+/***/ 9061:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var _curry3 =
@@ -23588,7 +23595,7 @@ module.exports = propOr;
 
 /***/ }),
 
-/***/ 1161:
+/***/ 6891:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var _curry3 =
@@ -27925,7 +27932,7 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 1441:
+/***/ 8090:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";

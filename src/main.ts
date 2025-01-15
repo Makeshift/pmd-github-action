@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
-import {findResults} from './search'
-import {Inputs} from './constants'
-import {annotationsForPath} from './annotations'
-import {chain, splitEvery} from 'ramda'
-import {Annotation} from './github'
-import {getOctokit, context} from '@actions/github'
+import { context, getOctokit } from '@actions/github'
+import { chain, splitEvery } from 'ramda'
+import { annotationsForPath } from './annotations'
+import { Inputs } from './constants'
+import { Annotation } from './github'
+import { findResults } from './search'
 
 const MAX_ANNOTATIONS_PER_REQUEST = 50
 
@@ -72,6 +72,10 @@ async function createCheck(
     check => check.name === name
   )
 
+  const summary = annotations.map(annotation => {
+    return `- \`${annotation.path}\` - ${annotation.start_line}:${annotation.end_line}`
+  })
+
   if (!existingCheckRun) {
     const createRequest = {
       ...context.repo,
@@ -81,6 +85,12 @@ async function createCheck(
       conclusion: numErrors === 0 ? <const>'success' : <const>'failure',
       output: {
         title,
+        text:
+          numErrors !== 0
+            ? `Found duplicated code in the following files:\n${summary.join(
+                '\n'
+              )}`
+            : '',
         summary: `${numErrors} violation(s) found`,
         annotations
       }
