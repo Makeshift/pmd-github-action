@@ -64,7 +64,9 @@ export function annotationsForPath(resultFile: string): Annotation[] {
       return map(file => {
         const dupeList = duplication.file
           .map(f => {
-            return `- ${f.path}:${f.line}`
+            return `- ${f.path}:${f.line}-${
+              Number(f.line) + Number(duplication.lines)
+            }`
           })
           .join('\n')
 

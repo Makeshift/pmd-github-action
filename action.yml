@@ -20,6 +20,8 @@ inputs:
       Also when generating a new PAT, select the least scopes necessary.
       [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
     default: ${{ github.token }}
+  appendCheckOutput:
+    description: Append the given output to the check run output
 runs:
   using: 'node12'
   main: 'dist/index.js'

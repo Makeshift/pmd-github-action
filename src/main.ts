@@ -73,8 +73,14 @@ async function createCheck(
   )
 
   const summary = annotations.map(annotation => {
-    return `- \`${annotation.path}\` - ${annotation.start_line}:${annotation.end_line}`
+    return `- \`${annotation.path}\`: ${annotation.start_line}-${annotation.end_line}`
   })
+
+  const additionalOutput = core.getInput('appendCheckOutput')
+
+  const outputText = `Found duplicated code in the following files:\n${summary.join(
+    '\n'
+  )}\n\n`
 
   if (!existingCheckRun) {
     const createRequest = {
@@ -85,12 +91,7 @@ async function createCheck(
       conclusion: numErrors === 0 ? <const>'success' : <const>'failure',
       output: {
         title,
-        text:
-          numErrors !== 0
-            ? `Found duplicated code in the following files:\n${summary.join(
-                '\n'
-              )}`
-            : '',
+        text: (numErrors !== 0 ? outputText : '') + additionalOutput,
         summary: `${numErrors} violation(s) found`,
         annotations
       }
